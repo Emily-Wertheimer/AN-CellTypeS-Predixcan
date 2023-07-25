@@ -1,0 +1,14 @@
+## login
+ssh ekw28@mccleary.ycrc.yale.edu 
+# then 2 factor authetification 
+
+## navigate to Huckins directory & set up folders 
+cd /gpfs/gibbs/pi/huckins 
+mkdir ekw28
+cd ekw28
+mkdir prediXcan_batch1
+cd prediXcan_batch1
+mkdir scratch
+
+
+
