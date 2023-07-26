@@ -10,5 +10,6 @@ mkdir prediXcan_batch1
 cd prediXcan_batch1
 mkdir scratch
 
-
+## navigate straight to my directory
+cd /gpfs/gibbs/pi/huckins/ekw28/
 
