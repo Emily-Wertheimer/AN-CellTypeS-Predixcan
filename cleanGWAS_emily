@@ -29,7 +29,7 @@ library(tidyverse)
 raw_path <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/anGWASraw.tsv')
 
 #Define where we want to save harmonized sumstats
-outpath <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/')
+outpath <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/anGWAS2019.sumstats.clean.txt')
 
 #Read in stats
 stats_raw <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/stats_raw', quote="", stringsAsFactors=F))
@@ -104,4 +104,4 @@ anGWAS2019.sumstats.clean <- sumstats_save_final
 
 #Save
 #write.table(sumstats_save_final, file=gzfile(paste0(outpath,filename_new_here)), sep = "\t", col.names=T, row.names = F,quote=F)
-write.table(anGWAS2019.sumstats.clean, file=gzfile(paste0(outpath, anGWAS2019.sumstats.clean)), sep = "\t", col.names=T, row.names = F,quote=F)
+write.table(anGWAS2019.sumstats.clean, file=outpath, sep = "\t", col.names=T, row.names = F,quote=F)
