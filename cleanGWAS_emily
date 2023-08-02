@@ -4,7 +4,7 @@ Manually clean out headers
 Upload to McCleary (gpfs/gibbs/project/levy_ifat/ekw28/) using YCRC OOD GUI
 
 ########################################
-ssh netid@mccleary.ycrc.yale.edu
+ssh ekw28@mccleary.ycrc.yale.edu
 # then two factor authentification
 
 #######################################
@@ -21,6 +21,8 @@ install.packages('data.table')
 library('data.table')
 install.packages('dplyr')
 library(dplyr)
+install.packages('tidyverse')
+library(tidyverse)
 
 ########################################
 #Define the path where the raw sumstats live - change your paths to those on your personal computer
@@ -61,33 +63,45 @@ sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151
 ​
 sumstats_merge_GTEx_rsid$OR <- exp(sumstats_merge_GTEx_rsid$'BETA')
 ​
+# couldnt get next line to work so did the below instead
 #sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx_rsid %>% dplyr::rename(PVAL='p.meta',SE='sdE.meta') #couldn't get this to work, instead renamed individually:
-> colnames(sumstats_merge_GTEx_rsid)[8] <-'p.meta'
+colnames(sumstats_merge_GTEx_rsid)[8] <-'p.meta'
 colnames(sumstats_merge_GTEx_rsid)[7] <-'sdE.meta'
 colnames(sumstats_merge_GTEx_rsid)[17] <-'variantID.hg38'
-colnames(sumstats_merge_GTEx_rsid)[18] <-'rs.id.dbSNP151.GRCh38p7
+colnames(sumstats_merge_GTEx_rsid)[18] <-'rs.id.dbSNP151.GRCh38p7'
 ​
-######################################## STOPPED HERE 8/1 - figuring out ref/effect alleles, odd ratios, log odds, etc. 
-#OR is included but no se -- WHAT? 
+######################################## 
+##Determine effect allele (from GWAS readme, confirm using paper fig) and rename
+
+#2019 AN GWAS: effect is given in beta. exp(beta) = odds ratio 
+#ref = A2
+#alt = A1
+#odds are in setting of alt allele
+
 effect_size='OR'
 effect_error='se'
-​
-########################################
-#Determine effect allele (from GWAS readme, confirm using paper fig) and rename
-​
-sumstats_save_filt <- sumstats_merge_GTEx_rsid %>% dplyr::rename(effect_allele='Effect.Meta', noneffect_allele='Baseline.Meta')
-​
+
+#check odds calculation
+#pick SNP from table 1 in 2019 paper: SNP = rs9821797, OR = 1.17, s.e. = 0.02
+filter(sumstats_merge_GTEx_rsid, ID=='rs62513865') # filter for chosen snp
+exp(#beta of chosen snp)
+​​
+sumstats_save_filt <- sumstats_merge_GTEx_rsid %>% dplyr::rename(effect_allele='alt', noneffect_allele='ref')
+
 # #Make sure reference/alternate alleles are the same between files
 # # If GTEx snp is A/C we want the GWAS to be A/C not A/G
 sumstats_save_filt <- sumstats_save_filt %>% filter((effect_allele == ref) | (effect_allele == alt)) %>% filter((noneffect_allele == ref) | (noneffect_allele == alt))
-​
+
 #Save new columns
 sumstats_save_final <- sumstats_save_filt %>% select(all_of(c('rs_id_dbSNP151_GRCh38p7','effect_allele','noneffect_allele','p',effect_size,effect_error)))
 ​
 #Combine into file name to later pull out in linux when we run s-predixcan
-filename_new_here <- paste0(paste(subfile_name,trait_name,paste(effect_size,effect_error,sep='_'),sep='-'),'.txt.gz')
-print(filename_new_here)
-​
-#Save
-write.table(sumstats_save_final, file=gzfile(paste0(outpath,filename_new_here)), sep = "\t", col.names=T, row.names = F,quote=F)
+#filename_new_here <- paste0(paste(subfile_name,trait_name,paste(effect_size,effect_error,sep='_'),sep='-'),'.txt.gz')
+#print(filename_new_here)
+#couldnt get previous 2 lines to work so did this instead: 
+anGWAS2019.sumstats.clean <- sumstats_save_final
+​head(anGWAS2019.sumstats.clean)
 
+#Save
+#write.table(sumstats_save_final, file=gzfile(paste0(outpath,filename_new_here)), sep = "\t", col.names=T, row.names = F,quote=F)
+write.table(anGWAS2019.sumstats.clean, file=gzfile(paste0(outpath, anGWAS2019.sumstats.clean)), sep = "\t", col.names=T, row.names = F,quote=F)
