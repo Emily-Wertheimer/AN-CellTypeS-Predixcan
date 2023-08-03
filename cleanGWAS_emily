@@ -102,6 +102,13 @@ sumstats_save_final <- sumstats_save_filt %>% select(all_of(c('rs_id_dbSNP151_GR
 anGWAS2019.sumstats.clean <- sumstats_save_final
 ​head(anGWAS2019.sumstats.clean)
 
+### TO DO 8/4 ###
+1. Figure out cols in anGWAS2019 sumstats clean file - should match those flagged in prediXcan file. why not? 
+  - fix this
+  - pull this updated file w/ correct colnames in predixcan code & run 
+####
+
+
 #Save
 #write.table(sumstats_save_final, file=gzfile(paste0(outpath,filename_new_here)), sep = "\t", col.names=T, row.names = F,quote=F)
 write.table(anGWAS2019.sumstats.clean, file=outpath, sep = "\t", col.names=T, row.names = F,quote=F)
