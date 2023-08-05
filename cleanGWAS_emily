@@ -26,13 +26,16 @@ library(tidyverse)
 
 ########################################
 #Define the path where the raw sumstats live - change your paths to those on your personal computer
-raw_path <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/anGWASraw.tsv')
+#raw_path <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/anGWAS2019_stats_raw.txt')
 
 #Define where we want to save harmonized sumstats
-outpath <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/anGWAS2019.sumstats.clean.txt')
+#outpath <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan.AN/data/anGWAS2019.sumstats.clean.2')
 
 #Read in stats
-stats_raw <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/stats_raw', quote="", stringsAsFactors=F))
+#stats_raw <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/stats_raw', quote="", stringsAsFactors=F))
+stats_raw <- read.table(file='AN.2019.gwas.download.orig.txt', header = TRUE)
+head(stats_raw)  
+
 #Check header names 
 head(stats_raw)
 ​
@@ -50,43 +53,60 @@ hg_map$pos_37 <- as.numeric(hg_map$pos_37)
 ########################################
 #Filter and Join by chromosome and 37 position 
 colnames(stats_raw)[1] <- 'CHR' # make sure colnames match bw two matrices
+stats_raw$CHR <- as.factor(stats_raw$CHR) # can check using class()
 sumstats_merge_GTEx <- inner_join(stats_raw,hg_map,by=c('CHR','POS'='pos_37'))
 head(sumstats_merge_GTEx)
 ​
 #Remove variants without an rsID
-sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151_GRCh38p7))
+sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151_GRCh38p7)) # this didn't actually remove anything for me 
 
 ########################################
 #Document names of required s-predixcan columns in this data
-#Rename pvalue without dots or slashes 
-#Meta-analysis
-​
-sumstats_merge_GTEx_rsid$OR <- exp(sumstats_merge_GTEx_rsid$'BETA')
-​
-# couldnt get next line to work so did the below instead
-#sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx_rsid %>% dplyr::rename(PVAL='p.meta',SE='sdE.meta') #couldn't get this to work, instead renamed individually:
-colnames(sumstats_merge_GTEx_rsid)[8] <-'p.meta'
-colnames(sumstats_merge_GTEx_rsid)[7] <-'sdE.meta'
-colnames(sumstats_merge_GTEx_rsid)[17] <-'variantID.hg38'
-colnames(sumstats_merge_GTEx_rsid)[18] <-'rs.id.dbSNP151.GRCh38p7'
-​
-######################################## 
+# rs_id_dbSNP151_GRCh38p7
+# effect_allele
+# noneffect_allele
+# p 
+# OR
+
 ##Determine effect allele (from GWAS readme, confirm using paper fig) and rename
+# 2019 AN GWAS: effect is given in beta. exp(beta) = odds ratio 
+# ref = A2
+# alt = A1
+# odds are in setting of alt allele
 
-#2019 AN GWAS: effect is given in beta. exp(beta) = odds ratio 
-#ref = A2
-#alt = A1
-#odds are in setting of alt allele
+#Rename pvalue without dots or slashes 
+colnames(sumstats_merge_GTEx_rsid)
+# [1] "CHR"                     "POS"                    
+# [3] "ID"                      "REF"                    
+# [5] "ALT"                     "BETA"                   
+# [7] "SE"                      "PVAL"                   
+# [9] "NGT"                     "IMPINFO"                
+# [11] "NEFFDIV2"                "NCAS"                   
+# [13] "NCON"                    "DIRE"                   
+# [15] "ref"                     "alt"                    
+# [17] "variant_id_hg38"         "rs_id_dbSNP151_GRCh38p7"
+colnames(sumstats_merge_GTEx_rsid)[4] <- 'noneffect_allele'
+colnames(sumstats_merge_GTEx_rsid)[5] <- 'effect_allele'
+colnames(sumstats_merge_GTEx_rsid)[8] <- 'p'
+colnames(sumstats_merge_GTEx_rsid)[17] <- 'variant.id.hg38'
+colnames(sumstats_merge_GTEx_rsid)[18] <- 'rs.id.dbSNP151.GRCh38p7'
 
-effect_size='OR'
-effect_error='se'
+# change BETA to OR and rename
+head(sumstats_merge_GTEx_rsid$BETA)
+# [1]  0.009197572  0.000199980  0.010900374  0.027595712 -0.024302939
+# [6]  0.018399683
+sumstats_merge_GTEx_rsid$OR <- exp(sumstats_merge_GTEx_rsid$'BETA')
+head(sumstats_merge_GTEx_rsid$OR)
+# [1] 1.00924 1.00020 1.01096 1.02798 0.97599 1.01857
 
-#check odds calculation
+# check odds calculation
 #pick SNP from table 1 in 2019 paper: SNP = rs9821797, OR = 1.17, s.e. = 0.02
 filter(sumstats_merge_GTEx_rsid, ID=='rs62513865') # filter for chosen snp
 exp(#beta of chosen snp)
-​​
-sumstats_save_filt <- sumstats_merge_GTEx_rsid %>% dplyr::rename(effect_allele='alt', noneffect_allele='ref')
+
+######################################## 
+
+sumstats_save_filt <- sumstats_merge_GTEx_rsid # %>% dplyr::rename(effect_allele='alt', noneffect_allele='ref')
 
 # #Make sure reference/alternate alleles are the same between files
 # # If GTEx snp is A/C we want the GWAS to be A/C not A/G
@@ -102,13 +122,6 @@ sumstats_save_final <- sumstats_save_filt %>% select(all_of(c('rs_id_dbSNP151_GR
 anGWAS2019.sumstats.clean <- sumstats_save_final
 ​head(anGWAS2019.sumstats.clean)
 
-### TO DO 8/4 ###
-1. Figure out cols in anGWAS2019 sumstats clean file - should match those flagged in prediXcan file. why not? 
-  - fix this
-  - pull this updated file w/ correct colnames in predixcan code & run 
-####
-
-
 #Save
-#write.table(sumstats_save_final, file=gzfile(paste0(outpath,filename_new_here)), sep = "\t", col.names=T, row.names = F,quote=F)
-write.table(anGWAS2019.sumstats.clean, file=outpath, sep = "\t", col.names=T, row.names = F,quote=F)
+outpath <- sprintf('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan.AN/data/anGWAS2019.sumstats.clean.2.txt')
+write.table(anGWAS2019.sumstats.clean.2, file=outpath, sep = "\t", col.names=T, row.names = F,quote=F)
