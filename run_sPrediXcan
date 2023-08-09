@@ -14,6 +14,7 @@ salloc -t 6:00:00 --mem=30G #tailor to what you need
 ####################################################################
 # load conda env to run spredix 
 ml miniconda 
+$ conda update -n base -c conda-forge conda
 conda env create -f /gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/software/conda_env.yaml
 
 ####################################################################
