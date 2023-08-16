@@ -9,22 +9,28 @@
 ssh ekw28@mccleary.ycrc.yale.edu
 
 #Request more memory/time
-salloc -t 6:00:00 --mem=30G #tailor to what you need
+salloc -t 6:00:00 --mem=32G #tailor to what you need
 
 ####################################################################
-# load conda env to run spredix 
-ml miniconda 
-$ conda update -n base -c conda-forge conda
-conda env create -f /gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/software/conda_env.yaml
+## load conda env to run spredix 
+
+# first time making environment
+module purge && module load miniconda
+conda env create -n py3_env_spredix --file /gpfs/gibbs/pi/huckins/software/MetaXcan/software/conda_env.yaml
+module purge && module load miniconda
+conda activate py3_env_spredix
+
+# every time after
+#conda activate py3_env_spredix # env loaded w/ .yaml 
+conda activate py3_envNEW_spredix # manually loaded env
 
 ####################################################################
-module load Python 
 
 #Location of software
-SPREDIX_path='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/software/SPrediXcan.py'
+SPREDIX_path=/gpfs/gibbs/pi/huckins/software/MetaXcan/software#/SPrediXcan.py
 module load Python
 
-####################################################################
+
 ​#Define outpath and scratch
 outpath='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data'
 scratch='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/scratch' #<SAVE .e/.o file LOCATION>
@@ -43,25 +49,15 @@ path_GWAS='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/anGWAS2019_sum
 # first tissue 
 tissue_predix=en_Adipose_Subcutaneous
 
-#PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/CMC/CMC_DLPFC-PrediXcan_Models/${tissue_predix}_newMetax.db
-PREDICT_DB_path='/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.db'
+PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/CMC/CMC_DLPFC-PrediXcan_Models/${tissue_predix}_newMetax.db
+#PREDICT_DB_path='/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.db'
 COVARIANCE_PATH='/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.txt.gz'
 #jobname=${trait_here}_${tissue_predix}_spredixcan
 ​
 #https://github.com/hakyimlab/MetaXcan/wiki/Command-Line-Reference#spredixcanpy
 #Change the snp_column, effect_allele_column, non_effect_allele_column, pvalue_column, or_column to match the colnames in the GWAS
-
-### load conda env to run spredix ###
-module unload Python 
-ml miniconda 
-conda env create -f /gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/software/conda_env.yaml
-
 ​
 #bsub -q express -P acc_psychgen -J ${jobname} -n 1 -W 1:00 -R rusage[mem=20000] -o ${jobname}.o -e ${jobname}.e python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename_here} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait_here}_${tissue_predix}.CMC
-#python ​${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename_here} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait_here}_${tissue_predix}.CMC
-#python ​$SPREDIX_path --model_db_path $PREDICT_DB_path --covariance $COVARIANCE_PATH --gwas_folder $path_GWAS --gwas_file_pattern $trait_filename_here --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file $outpath/$trait_here_$tissue_predix.CMC
-#python ​SPREDIX_path --model_db_path PREDICT_DB_path --covariance COVARIANCE_PATH --gwas_folder path_GWAS --gwas_file_pattern trait_filename_here --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file outpath/trait_here_tissue_predix.CMCSPREDIX_path --model_db_path 
-PREDICT_DB_path --covariance COVARIANCE_PATH --gwas_folder path_GWAS --gwas_file_pattern trait_filename_here --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file '/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/sPrediXcan_results_anGWAS2019_gTexV8.txt'
-
+python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --beta_column beta --output_file ${outpath}/${trait}_${p_type}_${tissue_predix}.GTExv8
 ​
 #done <${LOOPINGFILE}
