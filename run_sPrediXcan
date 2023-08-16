@@ -25,23 +25,20 @@ conda activate py3_env_spredix
 conda activate py3_envNEW_spredix # manually loaded env
 
 ####################################################################
-
 #Location of software
-SPREDIX_path=/gpfs/gibbs/pi/huckins/software/MetaXcan/software#/SPrediXcan.py
-module load Python
-
+SPREDIX_path=/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPrediXcan.py
 
 ​#Define outpath and scratch
-outpath='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data'
-scratch='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/scratch' #<SAVE .e/.o file LOCATION>
-#cd $scratch
+outpath=/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data
+scratch=/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/scratch #<SAVE .e/.o file LOCATION>
+cd $scratch
 ​
 #Change this to suite your GWAS
-traits=("AN_GWAS_2019")
-trait_filenames=("anGWAS2019_sumstats_clean_2.txt")
+trait=AN_GWAS_2019
+trait_filename=anGWAS2019_sumstats_clean_2.txt
 
 Define *clean* GWAS path and columns 
-path_GWAS='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/anGWAS2019_sumstats_clean_2.txt'
+path_GWAS=/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/anGWAS2019_sumstats_clean_2.txt
 
 ####################################################################
 #Define location of gtex v8 predictor model 
@@ -49,15 +46,11 @@ path_GWAS='/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/anGWAS2019_sum
 # first tissue 
 tissue_predix=en_Adipose_Subcutaneous
 
-PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/CMC/CMC_DLPFC-PrediXcan_Models/${tissue_predix}_newMetax.db
-#PREDICT_DB_path='/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.db'
-COVARIANCE_PATH='/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.txt.gz'
-#jobname=${trait_here}_${tissue_predix}_spredixcan
+PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_${tissue_predix}.db
+COVARIANCE_PATH=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_{tissue_predix}.txt.gz
 ​
 #https://github.com/hakyimlab/MetaXcan/wiki/Command-Line-Reference#spredixcanpy
 #Change the snp_column, effect_allele_column, non_effect_allele_column, pvalue_column, or_column to match the colnames in the GWAS
 ​
-#bsub -q express -P acc_psychgen -J ${jobname} -n 1 -W 1:00 -R rusage[mem=20000] -o ${jobname}.o -e ${jobname}.e python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename_here} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait_here}_${tissue_predix}.CMC
 python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --beta_column beta --output_file ${outpath}/${trait}_${p_type}_${tissue_predix}.GTExv8
 ​
-#done <${LOOPINGFILE}
