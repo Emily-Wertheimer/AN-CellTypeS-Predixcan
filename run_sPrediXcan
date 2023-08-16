@@ -38,19 +38,21 @@ trait=AN_GWAS_2019
 trait_filename=anGWAS2019_sumstats_clean_2.txt
 
 Define *clean* GWAS path and columns 
-path_GWAS=/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data/anGWAS2019_sumstats_clean_2.txt
+path_GWAS=/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data
 
 ####################################################################
 #Define location of gtex v8 predictor model 
 
 # first tissue 
-tissue_predix=en_Adipose_Subcutaneous
+tissue_predix=Adipose_Subcutaneous
 
-PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_${tissue_predix}.db
-COVARIANCE_PATH=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_{tissue_predix}.txt.gz
+PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.db
+#PREDICT_DB_path=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_${tissue_predix}.db
+COVARIANCE_PATH=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_Adipose_Subcutaneous.txt.gz
+#COVARIANCE_PATH=/gpfs/gibbs/pi/huckins/resources/predixcan/GTEX_v8/elastic_net_models/en_{tissue_predix}.txt.gz
+
 ​
 #https://github.com/hakyimlab/MetaXcan/wiki/Command-Line-Reference#spredixcanpy
 #Change the snp_column, effect_allele_column, non_effect_allele_column, pvalue_column, or_column to match the colnames in the GWAS
 ​
-python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --beta_column beta --output_file ${outpath}/${trait}_${p_type}_${tissue_predix}.GTExv8
-​
+python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs.id.dbSNP151.GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait}_${p_type}_${tissue_predix}.GTExv8​
