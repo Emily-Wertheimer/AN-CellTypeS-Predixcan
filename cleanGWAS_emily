@@ -9,7 +9,7 @@ ssh ekw28@mccleary.ycrc.yale.edu
 
 #######################################
 #Request more memory/time
-salloc -t 6:00:00 --mem=32G #tailor to what you need
+salloc -t 2:00:00 --mem=32G #tailor to what you need
 
 ########################################
 #Load R
@@ -33,7 +33,11 @@ library(tidyverse)
 
 #Read in stats
 #stats_raw <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/stats_raw', quote="", stringsAsFactors=F))
-stats_raw <- read.table(file='AN.2019.gwas.download.orig.txt', header = TRUE) #dim: 104805 14
+#stats_raw <- read.table(file='AN.2019.gwas.download.orig.txt', header = TRUE) #dim: 1048505      14
+
+##wrong dim, should have 8219103 rows!!!!!!## troubleshooting: 
+stats_raw<-read.csv(url('https://figshare.com/ndownloader/files/28169271')) #dim: 1048505      14
+
 
 #Check header names 
 head(stats_raw)
