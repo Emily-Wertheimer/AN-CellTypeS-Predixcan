@@ -9,7 +9,7 @@ ssh ekw28@mccleary.ycrc.yale.edu
 
 #######################################
 #Request more memory/time
-salloc -t 6:00:00 --mem=30G #tailor to what you need
+salloc -t 6:00:00 --mem=32G #tailor to what you need
 
 ########################################
 #Load R
@@ -33,32 +33,40 @@ library(tidyverse)
 
 #Read in stats
 #stats_raw <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/stats_raw', quote="", stringsAsFactors=F))
-stats_raw <- read.table(file='AN.2019.gwas.download.orig.txt', header = TRUE)
-head(stats_raw)  
+stats_raw <- read.table(file='AN.2019.gwas.download.orig.txt', header = TRUE) #dim: 104805 14
 
 #Check header names 
 head(stats_raw)
 ​
 #Change chromosome from a numeric vector to a factor(category)
-stats_raw$CHROM <- as.factor(stats_raw$CHROM) # can check using class()
-stats_raw$POS <- as.numeric(stats_raw$POS)
+stats_raw$CHROM <- as.factor(stats_raw$CHROM) # can check using class() #dim: 104805 14
+stats_raw$POS <- as.numeric(stats_raw$POS) #dim: 104805 14
 
 ########################################
 #Add GTEx rsIDs
-hg_map <- data.frame(fread('/gpfs/gibbs/pi/huckins/resources/GTEx_map_37.txt.gz',header=T,  sep="\t", quote = "",stringsAsFactors=F))
+hg_map <- data.frame(fread('/gpfs/gibbs/pi/huckins/resources/GTEx_map_37.txt.gz',header=T,  sep="\t", quote = "",stringsAsFactors=F)) #dim 465697 6
 head(hg_map)
-hg_map$CHR <- as.factor(hg_map$CHR)
-hg_map$pos_37 <- as.numeric(hg_map$pos_37)
+hg_map$CHR <- as.factor(hg_map$CHR) #dim 465697 6
+hg_map$pos_37 <- as.numeric(hg_map$pos_37) #46569704        6
 
 ########################################
 #Filter and Join by chromosome and 37 position 
-colnames(stats_raw)[1] <- 'CHR' # make sure colnames match bw two matrices
-stats_raw$CHR <- as.factor(stats_raw$CHR) # can check using class()
+colnames(stats_raw)[1] <- 'CHR' # make sure colnames match bw two matrices, #dim: 1048505      14
+stats_raw$CHR <- as.factor(stats_raw$CHR) # can check using class() #dim: 104805 14
 sumstats_merge_GTEx <- inner_join(stats_raw,hg_map,by=c('CHR','POS'='pos_37'))
 head(sumstats_merge_GTEx)
-​
+# warning message: In inner_join(stats_raw, hg_map, by = c("CHR", POS = "pos_37")) :
+ # Detected an unexpected many-to-many relationship between `x` and `y`.
+ #ℹ Row 383 of `x` matches multiple rows in `y`.
+ #ℹ Row 42548644 of `y` matches multiple rows in `x`.
+ #ℹ If a many-to-many relationship is expected, set `relationship = "many-to-many"` to silence this warning.
+head(sumstats_merge_GTEx)​
+dim(sumstats_merge_GTEx) #dim: 945197 18
+
+
 #Remove variants without an rsID
-sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151_GRCh38p7)) # this didn't actually remove anything for me 
+sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151_GRCh38p7)) 
+dim(sumstats_merge_GTEx_rsid) #dim: 945197 18
 
 ########################################
 #Document names of required s-predixcan columns in this data
@@ -66,7 +74,7 @@ sumstats_merge_GTEx_rsid <- sumstats_merge_GTEx %>% filter(!is.na(rs_id_dbSNP151
 # effect_allele
 # noneffect_allele
 # p 
-# OR
+# OR (instead of beta)
 
 ##Determine effect allele (from GWAS readme, confirm using paper fig) and rename
 # 2019 AN GWAS: effect is given in beta. exp(beta) = odds ratio 
@@ -90,6 +98,7 @@ colnames(sumstats_merge_GTEx_rsid)[5] <- 'effect_allele'
 colnames(sumstats_merge_GTEx_rsid)[8] <- 'p'
 colnames(sumstats_merge_GTEx_rsid)[17] <- 'variant.id.hg38'
 colnames(sumstats_merge_GTEx_rsid)[18] <- 'rs.id.dbSNP151.GRCh38p7'
+dim(sumstats_merge_GTEx_rsid) #dim: 945197     18
 
 # change BETA to OR and rename
 head(sumstats_merge_GTEx_rsid$BETA)
@@ -103,6 +112,18 @@ head(sumstats_merge_GTEx_rsid$OR)
 #pick SNP from table 1 in 2019 paper: SNP = rs9821797, OR = 1.17, s.e. = 0.02
 filter(sumstats_merge_GTEx_rsid, ID=='rs62513865') # filter for chosen snp
 exp(#beta of chosen snp)
+#dim: 945197 19
+#colnames
+# [1] "CHR"                     "POS"                    
+# [3] "ID"                      "noneffect_allele"       
+# [5] "effect_allele"           "BETA"                   
+# [7] "SE"                      "p"                      
+# [9] "NGT"                     "IMPINFO"                
+# [11] "NEFFDIV2"                "NCAS"                   
+# [13] "NCON"                    "DIRE"                   
+# [15] "ref"                     "alt"                    
+# [17] "variant.id.hg38"         "rs.id.dbSNP151.GRCh38p7"
+# [19] "OR"   
 
 ######################################## 
 
