@@ -1,0 +1,52 @@
+##############################################################################
+## set up
+#request resources
+salloc -t 6:00:00 --mem=32G 
+
+#load R
+ml R/4.2.0-foss-2020b
+R
+
+# install packages
+install.packages('data.table')
+library(data.table)
+install.packages('tidyverse')
+library(tidyverse)
+
+##############################################################################
+##############################################################################
+##Read in results and plot
+
+#Add directories to raw path
+setwd('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data')
+trait <- 'subcutaneousAdipose'
+p_type <- 'exact'
+path_spredixcan_here <- '/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPrediXcan.py'
+predixcan_subcutaneousAdipose <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/results/AN_GWAS_2019__Adipose_Subcutaneous.GTExv8'))
+
+#Replicate the original significance lines 
+#Experiment-wide
+p_experiment <- .05/nrow(predixcan_subcutaneousAdipose)
+#Tissue
+bonf_sig <- predixcan_subcutaneousAdipose %>% dplyr::count() %>% mutate(bonf=.05/n) 
+p_tissue <- mean(bonf_sig$bonf)
+
+#Left join predixcan with features to get gene start location 
+toplot_annot <- left_join(toplot,unique(featuredt[,c('Gene','start','Chr')]), by=c('gene_no_version' = 'Gene'))
+#Paste gene start and chr 
+toplot_annot$location <- paste(toplot_annot$Chr, toplot_annot$start, sep='.')
+
+#Look at bonferroni to annotate
+labeldf <- toplot_annot %>% filter(Is_BMIQTL == 'Overlaps BMI-QTL') %>% filter(pvalue <= p_experiment) %>% mutate(label_here=paste(gene_name,My_Tissue,sep=': '))
+
+#Plot manhattan
+pdf(paste(path_output,paste(trait,p_type, 'GTEXv8_Manhattan_exact.pdf', sep='_'), sep='/'), height=10, width=20)
+ggplot(toplot_annot,aes(x = as.numeric(location), y = -log10(pvalue), color=as.factor(CHR))) + 
+geom_point() + 
+theme_classic(base_size=24) +
+geom_hline(yintercept=-log10(p_experiment), linetype='dashed', color='red') + 
+geom_hline(yintercept=-log10(p_tissue), linetype='dashed', color='darkgray') + 
+geom_text_repel(data=labeldf, aes(label=label_here), size=6, max.overlaps=20, color='black') + 
+scale_x_continuous(limits=c(1,23),breaks=seq(1.5,22.5), labels=seq(1,22)) + 
+labs(x='Chromosome', y='-log10(p)')
+dev.off()
