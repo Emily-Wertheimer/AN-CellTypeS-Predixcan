@@ -15,6 +15,37 @@ library(tidyverse)
 
 ##############################################################################
 ##############################################################################
+
+path_spredixcan_here <- '/home/ekw28/project/sPrediXcan_AN/results'
+file_pattern_predixcan <- paste0(trait,'.*',p_type,'.*','GTExv8')
+plottingdir <- '/home/ekw28/project/sPrediXcan_AN/figures'
+cat("Reading in S-predixcan output from all tissues  \n")
+
+adipose_subcu_spredix <- as.data.frame(fread('/home/ekw28/project/sPrediXcan_AN/results/AN_GWAS_2019__Adipose_Subcutaneous.GTExv8'))
+
+#Replicate the original significance lines 
+#Tissue
+bonf_sig <-  adipose_subcu_spredix %>% dplyr::count() %>% mutate(bonf=.05/n) #  n: 8590 bonf: 5.820722e-06
+p_tissue <- mean(bonf_sig$bonf) # 5.820722e-06
+​
+# read in features
+tissues <- read_lines('/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/All_Tissues_v8_removed_lowN.txt')
+tissues_nospaces <- <- gsub(' ', '',tissues)
+path_feature <- '/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/%s_featureData.txt.gz'
+
+all_features <- NULL
+
+for (tissue_here in tissues_nospaces){
+	#Subset eGenes
+	tissue_here <- 'Adipose-Subcutaneous'
+	path_feature_here <- sprintf(path_feature,tissue_here)
+	featuredt <- as.data.frame(fread(path_feature_here, header=T, sep="\t", quote = "",stringsAsFactors=F))
+	featuredt$tissue <- tissue_here
+	all_features <- rbind(all_features,featuredt)
+}
+​
+##############################################################################
+##############################################################################
 ##Read in results and plot
 
 #Add directories to raw path
