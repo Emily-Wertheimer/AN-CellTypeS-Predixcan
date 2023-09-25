@@ -1,22 +1,26 @@
+## get started
 ml R/4.2.0-foss-2020b
-
 install.packages('data.table')
 install.packages('tidyverse')
 library(data.table)
 library(tidyverse)
 
+## read in spredix results and tissues
 spredix_software_path <-'/home/ekw28/project/sPrediXcan_AN/software'
-predix_results_path <- '/home/ekw28/project/sPrediXcan_AN/software'
+path_predix_results_adiposeSub <-sprintf('/home/ekw28/project/sPrediXcan_AN/results/AN_GWAS_2019__Adipose_Subcutaneous.GTExv8')
+predix_results_adiposeSub <- as.data.frame(fread(path_predix_results_adiposeSub))
+tissues <-read_lines('/home/ekw28/project/sPrediXcan_AN/GTEx_v8_elastic_net_copies/en_Adipose_Subcutaneous.txt')
+tissues_nospaces <- gsub(' ', '',tissues)
+path_feature <- '/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/Adipose-Subcutaneous_featureData.txt.gz'
+all_features <- NULL
+tissue_here <- 'en_Adipose_Subcutaneous.txt'
+path_feature_here <- sprintf('/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/Adipose-Subcutaneous_featureData.txt.gz')
+featuredt <- as.data.frame(fread(path_feature_here, header=T, sep="\t", quote = "",stringsAsFactors=F))
+featuredt$tissue <- tissue_here
+all_features <- rbind(all_features,featuredt)
 
-tissues_path <- '/home/ekw28/project/sPrediXcan_AN/GTEx_v8_elastic_net_copies/en_Adipose_Subcutaneous.txt'
-features_path <- '/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/Adipose-Subcutaneous_featureData.txt.gz'
-tissues <- as.data.frame(read_lines(tissues_path))
-features <- as.data.frame(read_lines(features_path))
-predix_w_features <- left_join(tissues, unique(features[,c('Name', 'start', 'Chr')]), by = c('gene' = 'Name'))
-spredix_w_features <-left_join(tissues,unique(features[,c('Name','start','Chr')]), by=c('gene' = 'Name'))
+## left join predixcan w/ features to get gene start location
+toplot_annot <- left_join(predix_results_adiposeSub,unique(all_features[,c('Name','start','Chr')]), by=c('gene' = 'Name'))
 
-
-##Error in `[.data.frame`(features, , c("Name", "start", "Chr")) : 
-  ##undefined columns selected
-
-
+## Paste gene start and chr 
+toplot_annot$location <- paste(toplot_annot$Chr, toplot_annot$start, sep='.')
