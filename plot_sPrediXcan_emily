@@ -24,3 +24,18 @@ toplot_annot <- left_join(predix_results_adiposeSub,unique(all_features[,c('Name
 
 ## Paste gene start and chr 
 toplot_annot$location <- paste(toplot_annot$Chr, toplot_annot$start, sep='.')
+
+## find bonf sig
+bonf_sig <- toplot_annot %>% dplyr::count() %>% mutate(bonf=.05/n) 
+
+## plot spredix manhattan for tissue type ----- trouble shoot this!
+plottingdir <- '/home/ekw28/project/sPrediXcan_AN/figures'
+pdf(paste(plottingdir,'adipose_subcutaneous_spredix_GTEXv8_Manhattan.pdf', sep='_'), sep='/'), height=10, width=20)
+ggplot(toplot_annot,aes(x = as.numeric(location), y = -log10(pvalue), color=as.factor(Chr))) + 
+geom_point() + 
+theme_classic(base_size=24) +
+geom_hline(yintercept=bonf_sig, linetype='dashed', color='red') + 
+scale_x_continuous(limits=c(1,23),breaks=seq(1.5,22.5), labels=seq(1,22)) + 
+labs(x='Chromosome', y='-log10(p)')
+
+
