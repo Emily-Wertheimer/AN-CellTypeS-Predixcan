@@ -1,83 +1,22 @@
-##############################################################################
-## set up
-#request resources
-salloc -t 6:00:00 --mem=32G 
-
-#load R
 ml R/4.2.0-foss-2020b
-R
 
-# install packages
 install.packages('data.table')
-library(data.table)
 install.packages('tidyverse')
+library(data.table)
 library(tidyverse)
 
-##############################################################################
-##############################################################################
+spredix_software_path <-'/home/ekw28/project/sPrediXcan_AN/software'
+predix_results_path <- '/home/ekw28/project/sPrediXcan_AN/software'
 
-path_spredixcan_here <- '/home/ekw28/project/sPrediXcan_AN/results'
-file_pattern_predixcan <- paste0(trait,'.*',p_type,'.*','GTExv8')
-plottingdir <- '/home/ekw28/project/sPrediXcan_AN/figures'
-cat("Reading in S-predixcan output from all tissues  \n")
+tissues_path <- '/home/ekw28/project/sPrediXcan_AN/GTEx_v8_elastic_net_copies/en_Adipose_Subcutaneous.txt'
+features_path <- '/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/Adipose-Subcutaneous_featureData.txt.gz'
+tissues <- as.data.frame(read_lines(tissues_path))
+features <- as.data.frame(read_lines(features_path))
+predix_w_features <- left_join(tissues, unique(features[,c('Name', 'start', 'Chr')]), by = c('gene' = 'Name'))
+spredix_w_features <-left_join(tissues,unique(features[,c('Name','start','Chr')]), by=c('gene' = 'Name'))
 
-adipose_subcu_spredix <- as.data.frame(fread('/home/ekw28/project/sPrediXcan_AN/results/AN_GWAS_2019__Adipose_Subcutaneous.GTExv8'))
 
-#Replicate the original significance lines 
-#Tissue
-bonf_sig <-  adipose_subcu_spredix %>% dplyr::count() %>% mutate(bonf=.05/n) #  n: 8590 bonf: 5.820722e-06
-p_tissue <- mean(bonf_sig$bonf) # 5.820722e-06
-​
-# read in features
-tissues <- read_lines('/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/All_Tissues_v8_removed_lowN.txt')
-tissues_nospaces <- <- gsub(' ', '',tissues)
-path_feature <- '/gpfs/gibbs/pi/huckins/projects/GTEx/BMI/featureData_bytissue/%s_featureData.txt.gz'
+##Error in `[.data.frame`(features, , c("Name", "start", "Chr")) : 
+  ##undefined columns selected
 
-all_features <- NULL
 
-for (tissue_here in tissues_nospaces){
-	#Subset eGenes
-	tissue_here <- 'Adipose-Subcutaneous'
-	path_feature_here <- sprintf(path_feature,tissue_here)
-	featuredt <- as.data.frame(fread(path_feature_here, header=T, sep="\t", quote = "",stringsAsFactors=F))
-	featuredt$tissue <- tissue_here
-	all_features <- rbind(all_features,featuredt)
-}
-​
-##############################################################################
-##############################################################################
-##Read in results and plot
-
-#Add directories to raw path
-setwd('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/data')
-trait <- 'subcutaneousAdipose'
-p_type <- 'exact'
-path_spredixcan_here <- '/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPrediXcan.py'
-predixcan_subcutaneousAdipose <- as.data.frame(fread('/gpfs/gibbs/project/levy_ifat/ekw28/sPrediXcan_AN/results/AN_GWAS_2019__Adipose_Subcutaneous.GTExv8'))
-
-#Replicate the original significance lines 
-#Experiment-wide
-p_experiment <- .05/nrow(predixcan_subcutaneousAdipose)
-#Tissue
-bonf_sig <- predixcan_subcutaneousAdipose %>% dplyr::count() %>% mutate(bonf=.05/n) 
-p_tissue <- mean(bonf_sig$bonf)
-
-#Left join predixcan with features to get gene start location 
-toplot_annot <- left_join(toplot,unique(featuredt[,c('Gene','start','Chr')]), by=c('gene_no_version' = 'Gene'))
-#Paste gene start and chr 
-toplot_annot$location <- paste(toplot_annot$Chr, toplot_annot$start, sep='.')
-
-#Look at bonferroni to annotate
-labeldf <- toplot_annot %>% filter(Is_BMIQTL == 'Overlaps BMI-QTL') %>% filter(pvalue <= p_experiment) %>% mutate(label_here=paste(gene_name,My_Tissue,sep=': '))
-
-#Plot manhattan
-pdf(paste(path_output,paste(trait,p_type, 'GTEXv8_Manhattan_exact.pdf', sep='_'), sep='/'), height=10, width=20)
-ggplot(toplot_annot,aes(x = as.numeric(location), y = -log10(pvalue), color=as.factor(CHR))) + 
-geom_point() + 
-theme_classic(base_size=24) +
-geom_hline(yintercept=-log10(p_experiment), linetype='dashed', color='red') + 
-geom_hline(yintercept=-log10(p_tissue), linetype='dashed', color='darkgray') + 
-geom_text_repel(data=labeldf, aes(label=label_here), size=6, max.overlaps=20, color='black') + 
-scale_x_continuous(limits=c(1,23),breaks=seq(1.5,22.5), labels=seq(1,22)) + 
-labs(x='Chromosome', y='-log10(p)')
-dev.off()
