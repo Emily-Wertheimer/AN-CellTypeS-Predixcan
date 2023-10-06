@@ -24,26 +24,24 @@ all_features <- rbind(all_features,featuredt)
 ## left join predixcan w/ features to get gene start location
 toplot_annot <- left_join(predix_results_adiposeSub,unique(all_features[,c('Name','start','Chr')]), by=c('gene' = 'Name'))
 
+## add location col 
+toplot_annot$location <- as.numeric(paste(toplot_annot$Chr, toplot_annot$start, sep = '.'))
+
 ## find bonf sig
 bonf_sig <- toplot_annot %>% dplyr::count() %>% mutate(bonf=.05/n) 
-
-## plot spredix manhattan for tissue type
-
 
 
 # Create the Manhattan plot
 plottingdir <- '/vast/palmer/home.mccleary/ekw28/AN-CellTypeS-Predixcan/sPrediXcan_AN/figures'
 png("manhattan_plot.png", width = 12, height = 6, res = 300, units = "in")
-manhattan_plot <- ggplot(toplot_annot, aes(x = as.numeric(Chr), y = -log10(pvalue), color=as.factor(Chr))) + 
+manhattan_plot <- ggplot(toplot_annot, aes(x = as.numeric(location), y = -log10(pvalue), color=as.factor(Chr))) + 
   geom_point(size=2) + 
   theme_classic(base_size=24) +
   geom_hline(yintercept=bonf_sig[1,2], linetype='dashed', color='red') + 
   scale_x_continuous(limits=c(1,23),breaks=seq(1.5,22.5), labels=seq(1,22)) + 
   labs(x='Chromosome', y='-log10(p)')
-  #dev.set(dev.next()) # used this instead of dev.off()
 dev.off()
 
-  
+
 # Display the plot
 print(manhattan_plot)
-
