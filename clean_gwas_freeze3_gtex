@@ -1,0 +1,25 @@
+## load necessary libraries
+if(!require(data.table)) {install.packages("data.table")}; library(data.table)
+if(!require(tidyverse)) {install.packages("tidyverse")}; library(tidyverse)
+if(!require(R.utils)) {install.packages("R.utils")}; library(R.utils)
+
+## load data
+stats_raw <- as.data.frame(fread('/home/ekw28/AN-CellTypeS-Predixcan/sPrediXcan_
+AN/data/freeze3sumStats/daner_AN.meta.gz', quote="", stringsAsFactors=F)) 
+
+hg_map <- data.frame(fread('/gpfs/gibbs/pi/huckins/resources/GTEx_map_37.txt.gz'
+,header=T,  sep="\t", quote = "",stringsAsFactors=F))
+
+## change chr & pos to factors
+stats_raw$CHR <- as.factor(stats_raw$CHR) 
+stats_raw$BP <- as.numeric(stats_raw$BP)
+
+hg_map$CHR <- as.factor(hg_map$CHR) 
+
+## id & rename ref & alt 
+colnames(stats_raw)[4]<-'ref'
+colnames(stats_raw)[5]<-'alt'
+
+## join sumstats w/ human genome map by chromosome & position 
+
+sumstats_merge_GTEx <- inner_join(stats_raw,hg_map,by=c('CHR','BP'='pos_37'))
