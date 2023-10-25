@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# load environment
+ml miniconda
+conda activate py3_envNEW_spredix
+
+# make directory for project
+mkdir /home/ekw28/AN-CellTypeS-Predixcan/AN_Freeze3_brainCellTypes                                                            
+mkdir /home/ekw28/AN-CellTypeS-Predixcan/AN_Freeze3_brainCellTypes/scratch
+
+
+
+# set file locations
+SPREDIX_path=/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPrediXcan.py
+outpath=/home/ekw28/AN-CellTypeS-Predixcan/AN_Freeze3_brainCellTypes
+scratch=/home/ekw28/AN-CellTypeS-Predixcan/AN_Freeze3_brainCellTypes/scratch                                
+cd $scratch
+
+# change this to suit GWAS
+trait=AN
+trait_filename=
