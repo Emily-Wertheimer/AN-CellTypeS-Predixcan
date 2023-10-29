@@ -1,10 +1,14 @@
-
-  GNU nano 2.9.8                                                      submitJob.txt                                                       Modified  
 #!/bin/bash
-#SBATCH -J --job-name=#???? #do i need -J flag?
-#SBATCH --mem=#??
-#SBATCH --cpus-per-task=#??
-#SBATCH --partition=#?? 
-#SBATCH --time=#??
-module load R-bundle-Bioconductor/3.15-foss-2020b-R-4.2.0
-Rscript #script name here 
+
+#SBATCH -J --job-name=run_sPredix_excitatoryNeurons_AN
+#SBATCH --mem=20G
+#SBATCH --cpus-per-task=40
+#SBATCH --partition=day
+#SBATCH --time=1-
+
+## load modules
+#module load #module here
+
+#script name
+runSpredix_freeze3AN_brainCell.sh
+
