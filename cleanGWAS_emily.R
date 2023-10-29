@@ -1,21 +1,10 @@
-########################################
-Download AN 2019 GWAS sumstats from pgc website (don't save!)
-Upload to McCleary (gpfs/gibbs/project/levy_ifat/ekw28/) using YCRC OOD GUI
+## get started
+#Download AN 2019 GWAS sumstats from pgc website (don't save!)
+#Upload to McCleary (gpfs/gibbs/project/levy_ifat/ekw28/) using YCRC OOD GUI
+#request resources
+#load R
 
-########################################
-ssh ekw28@mccleary.ycrc.yale.edu
-# then two factor authentification
-
-#######################################
-#Request more memory/time
-salloc -t 2:00:00 --mem=32G #tailor to what you need
-
-########################################
-#Load R
-module load R
-R
-
-#Install packagaes 
+##Install packagaes 
 install.packages('data.table')
 library('data.table')
 install.packages('dplyr')
