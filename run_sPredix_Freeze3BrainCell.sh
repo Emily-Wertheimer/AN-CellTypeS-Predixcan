@@ -37,14 +37,14 @@ PREDICT_DB_path=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excita
 COVARIANCE_PATH=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/BasoAmyg_Excitatory_Neurons_LD_covariance_matrix.txt.gz
 
 ## Specify GWAS column names (modify these based on your GWAS data)
-snp_column="rs.id.dbSNP151.GRCh38p7"
+snp_column="rs_id_dbSNP151_GRCh38p7"
 effect_allele_column="effect_allele"
 non_effect_allele_column="noneffect_allele"
 pvalue_column="p"
 or_column="OR"
 
 ## Run spredixcan
-python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs.id.dbSNP151.GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait}_${tissue_predix}.carina.cell.type​
+python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIANCE_PATH} --gwas_folder ${path_GWAS} --gwas_file_pattern ${trait_filename} --snp_column rs_id_dbSNP151_GRCh38p7 --effect_allele_column effect_allele --non_effect_allele_column noneffect_allele --pvalue_column p --or_column OR --output_file ${outpath}/${trait}_${tissue_predix}.carina.cell.type​
 
 ######################################################################################
 
