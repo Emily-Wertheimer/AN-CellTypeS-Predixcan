@@ -16,9 +16,8 @@ runSpredix_freeze3AN_brainCell.sh
 ######################################################################################
 ## location of software & environments
 SPREDIX_path=/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPrediXcan.py
-ml python
 module purge && module load miniconda
-source=/gpfs/gibbs/pi/huckins/software/MetaXcan/software/conda_env.yaml
+#source=/gpfs/gibbs/pi/huckins/software/MetaXcan/software/conda_env.yaml
 conda activate py3_env_spredix
 
 # Set software file locations
