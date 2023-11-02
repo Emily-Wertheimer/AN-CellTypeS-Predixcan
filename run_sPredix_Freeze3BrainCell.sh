@@ -27,14 +27,14 @@ cd $scratch
 
 # Set GWAS trait information
 trait=AN
-trait_filename=freeze3.AN.GWAS.sumstats.clean
-path_GWAS=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo 
+trait_filename=freeze3.gwas.sumstats.clean2.txt
+path_GWAS=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo
 
 ######################################################################################
 ### submit 1 tissue per job
-tissue_predix=BasoAmyg_Excitatory_Neurons # options are: BasoAmyg_, dACC_, DLPFC_, MedialAmyg_
-PREDICT_DB_path=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/BasoAmyg_Excitatory_Neurons_weights.db 
-COVARIANCE_PATH=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/BasoAmyg_Excitatory_Neurons_LD_covariance_matrix.txt
+tissue_predix=dACC_Excitatory_Neurons # options are: BasoAmyg_, dACC_, DLPFC_, MedialAmyg_
+PREDICT_DB_path=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/dACC_Excitatory_Neurons_weights.db 
+COVARIANCE_PATH=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/dACC_Excitatory_Neurons_LD_covariance_matrix.txt.gz
 
 ## double check gwas colnames
 #Change the snp_column, effect_allele_column, non_effect_allele_column, pvalue_column, or_column to match the colnames in the GWAS
