@@ -66,7 +66,7 @@ python ${SPREDIX_path} --model_db_path ${PREDICT_DB_path} --covariance ${COVARIA
 
 ## Run SPrediXcan for e/ tissue type
 #LOOPINGFILE=/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons
-cd $scratch
+#cd $scratch
 #for tissue in ${tissueType_predix[@]}; do
  #   python ${SPREDIX_path} \
  #   --model_db_path ${PREDICT_DB_path}/${tissue}/${cellType_predix}.db \
