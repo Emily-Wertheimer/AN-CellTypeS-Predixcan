@@ -4,8 +4,7 @@ if(!require(tidyverse)) {install.packages("tidyverse")}; library(tidyverse)
 if(!require(R.utils)) {install.packages("R.utils")}; library(R.utils)
 
 ## load data
-stats_raw <- as.data.frame(fread('/home/ekw28/AN-CellTypeS-Predixcan/sPrediXcan_
-AN/data/freeze3sumStats/daner_AN.meta.gz', quote="", stringsAsFactors=F)) 
+stats_raw <- as.data.frame(fread('/home/ekw28/AN-CellTypeS-Predixcan/sPrediXcan_AN/data/freeze3sumStats/daner_AN.meta.gz', quote="", stringsAsFactors=F)) 
 
 hg_map <- data.frame(fread('/gpfs/gibbs/pi/huckins/resources/GTEx_map_37.txt.gz'
 ,header=T,  sep="\t", quote = "",stringsAsFactors=F))
@@ -63,4 +62,5 @@ freeze3.gwas.sumstats.clean <- sumstats_save_final
 ​head(anGWAS2019.sumstats.clean)
 
 #Save
-write.table(freeze3.gwas.sumstats.clean, file = "/vast/palmer/home.mccleary/ekw28/freeze3.gwas.sumstats.clean")
+#write.table(freeze3.gwas.sumstats.clean, file = "/vast/palmer/home.mccleary/ekw28/freeze3.gwas.sumstats.clean")
+write.table(freeze3.gwas.sumstats.clean, file=/home/ekw28/AN-CellTypeS-Predixcan/freeze3.gwas.sumstats.clean2, sep = "\t", col.names=T, row.names = F,quote=F)
