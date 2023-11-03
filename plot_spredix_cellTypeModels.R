@@ -35,7 +35,7 @@ toplot_annot <- left_join(predix_results,unique(all_features[,c('Gene_name','Gen
 ## add location col 
 #toplot_annot$location <- as.numeric(paste(toplot_annot$Chromosome, toplot_annot$Gene_start, sep = '.'))
 toplot_annot$location <- gsub("[^0-9]", "", toplot_annot$Chromosome)
-
+#toplot_annot$location <- as.numeric(paste(toplot_annot$Chromosome, toplot_annot$Gene_start,sep=‘.’)) #this doesn't work but need to spread out points based on bp position on x axis of plot
 
 ## find bonf sig
 bonf <- toplot_annot %>% dplyr::count() %>% mutate(bonf=.05/n) 
