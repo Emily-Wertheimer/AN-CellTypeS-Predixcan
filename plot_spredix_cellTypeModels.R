@@ -18,7 +18,7 @@ spredix_software_path <-'/gpfs/gibbs/pi/huckins/software/MetaXcan/software/SPred
 #path_spredix_results <- sprintf(paste0('/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/', tissue_predix, cell_type_predix, suffix))
 #predix_results <- read.csv(path_spredix_results)
 predix_results <- read.csv('/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/AN_BasoAmyg_Excitatory_Neurons.carina.cell.type')
-#tissues <- read_lines('/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/BasoAmyg_Excitatory_Neurons_LD_covariance_matrix.txt')
+tissues <- read_lines('/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/Excitatory_Neurons/BasoAmyg_Excitatory_Neurons_LD_covariance_matrix.txt')
 tissues_nospaces <- gsub(' ', '',tissues)
 
 all_features <- NULL
@@ -33,9 +33,10 @@ all_features <- featuredt
 toplot_annot <- left_join(predix_results,unique(all_features[,c('Gene_name','Gene_start','Chromosome')]), by=c('gene_name'='Gene_name'))
 
 ## add location col 
-#toplot_annot$location <- as.numeric(paste(toplot_annot$Chromosome, toplot_annot$Gene_start, sep = '.'))
-toplot_annot$location <- gsub("[^0-9]", "", toplot_annot$Chromosome)
 #toplot_annot$location <- as.numeric(paste(toplot_annot$Chromosome, toplot_annot$Gene_start,sep=‘.’)) #this doesn't work but need to spread out points based on bp position on x axis of plot
+toplot_annot$location <- gsub("[^0-9]", "", toplot_annot$Chromosome) #removes "chr" (e.g. "chr3" --> "3")
+toplot_annot$locationBP <- as.numeric(paste(toplot_annot$location, toplot_annot$Gene_start, sep='.'))
+
 
 ## find bonf sig
 bonf <- toplot_annot %>% dplyr::count() %>% mutate(bonf=.05/n) 
@@ -45,8 +46,8 @@ bonf_sig <- -log10(bonf$bonf)
 plottingdir <- '/home/ekw28/AN-CellTypeS-Predixcan/freeze3_cellTypes_repo/figures'
 png(tissue_predix, cell_type_predix, "manhattan_plot.png", width = 12, height = 6, res = 300, units = "in")
 
-manhattan_plot <- ggplot(toplot_annot, aes(x = as.numeric(location), y = -log10(pvalue), color=as.factor(Chr))) + 
-  geom_point(size=2) + 
+manhattan_plot <- ggplot(toplot_annot, aes(x = as.numeric(locationBP), y = -log10(pvalue), color=as.factor(Chromosome))) + 
+  geom_point(size=2) +  
   theme_classic(base_size=24) +
   geom_hline(yintercept = bonf_sig, linetype='dashed', color='red') + 
   scale_x_continuous(limits=c(1,23),breaks=seq(1.5,22.5), labels=seq(1,22)) + 
