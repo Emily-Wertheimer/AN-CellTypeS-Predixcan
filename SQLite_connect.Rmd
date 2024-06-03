@@ -1,0 +1,16 @@
+cat("SETUP: loading libraries\n")
+suppressMessages(library(data.table))
+suppressMessages(library(tidyverse))
+suppressMessages(library(DBI))
+
+
+#connect to an in memory SQLite database
+con <- dbConnect(RSQLite::SQLite(), sprintf('/sc/arion/projects/psychgen/HUCKINS_LAB_DONT_DELETE/resources/predixcan/GTEX_v8/elastic_net_models/en_%s.db',tissue_predix))
+dbListTables(con)
+weights <- dbGetQuery(con, 'SELECT * FROM weights')
+extra <- dbGetQuery(con, 'SELECT * FROM extra')
+dbDisconnect(con)
+
+# weights --> betas, SNPs, 
+# extra --> model stats
+#.db files --> use to see which SNPs are used to predict e/ gene
